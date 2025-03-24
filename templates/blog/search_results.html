@@ -1,0 +1,42 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="search-results">
+    <h2>Search Results</h2>
+    
+    <form method="get" action="{% url 'search' %}" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Search blogs..." value="{{ query }}">
+            <button class="btn btn-primary" type="submit">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+    </form>
+
+    {% if query %}
+        <p>Found {{ blogs.count }} results for "{{ query }}"</p>
+    {% endif %}
+
+    {% if blogs %}
+        <div class="row">
+            {% for blog in blogs %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{{ blog.get_absolute_url }}" class="text-decoration-none">{{ blog.name }}</a>
+                            </h5>
+                            <p class="card-text text-muted">
+                                By <a href="{{ blog.author.get_absolute_url }}">{{ blog.author }}</a> on {{ blog.post_date }}
+                            </p>
+                            <p class="card-text">{{ blog.description|truncatewords:30 }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No blogs found.</p>
+    {% endif %}
+</div>
+{% endblock %} 

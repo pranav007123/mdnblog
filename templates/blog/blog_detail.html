@@ -1,0 +1,237 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="blog-detail">
+    <div class="blog-header">
+        <h1>{{ blog.name }}</h1>
+        <div class="blog-meta">
+            <p><strong>Author:</strong> <a href="{{ blog.author.get_absolute_url }}">{{ blog.author }}</a></p>
+            <p><strong>Post Date:</strong> {{ blog.post_date }}</p>
+            <p><strong>Reading Time:</strong> {{ blog.description|wordcount|add:"199"|divisibleby:200|add:1 }} min read</p>
+        </div>
+    </div>
+
+    <div class="blog-content">
+        <p>{{ blog.description }}</p>
+    </div>
+
+    <div class="share-section">
+        <h3>Share this blog</h3>
+        <div class="share-buttons">
+            <a href="https://twitter.com/intent/tweet?text={{ blog.name|urlencode }}&url={{ request.build_absolute_uri|urlencode }}" 
+               class="share-button twitter" target="_blank">
+                <i class="fab fa-twitter"></i> Twitter
+            </a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" 
+               class="share-button facebook" target="_blank">
+                <i class="fab fa-facebook"></i> Facebook
+            </a>
+            <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri|urlencode }}&title={{ blog.name|urlencode }}" 
+               class="share-button linkedin" target="_blank">
+                <i class="fab fa-linkedin"></i> LinkedIn
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="comments">
+    <h2>Comments</h2>
+    {% if blog.comments.all %}
+        <div class="comments-list">
+        {% for comment in blog.comments.all %}
+            <div class="comment-card">
+                <div class="comment-header">
+                    <strong>{{ comment.author }}</strong>
+                    <span class="comment-date">{{ comment.post_date }}</span>
+                </div>
+                <div class="comment-content">
+                    <p>{{ comment.description }}</p>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        <p class="no-comments">No comments yet. Be the first to comment!</p>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        <div class="add-comment">
+            <a href="{% url 'comment-create' blog.pk %}" class="btn btn-primary">
+                <i class="fas fa-comment"></i> Add a new comment
+            </a>
+        </div>
+    {% else %}
+        <div class="login-prompt">
+            <p><a href="{% url 'login' %}">Login</a> to add a new comment.</p>
+        </div>
+    {% endif %}
+</div>
+
+{% if related_blogs %}
+<div class="related-blogs">
+    <h2>Related Blogs</h2>
+    <div class="related-blogs-grid">
+        {% for blog in related_blogs %}
+        <div class="related-blog-card">
+            <h3><a href="{{ blog.get_absolute_url }}">{{ blog.name }}</a></h3>
+            <p class="blog-meta">
+                <small>By {{ blog.author }} on {{ blog.post_date }}</small>
+            </p>
+            <p class="blog-excerpt">{{ blog.description|truncatewords:30 }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .blog-detail {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .blog-header {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .blog-meta {
+        color: var(--text-muted);
+        font-size: 0.9em;
+        margin: 10px 0;
+    }
+
+    .blog-content {
+        line-height: 1.8;
+        font-size: 1.1em;
+        margin-bottom: 40px;
+    }
+
+    .share-section {
+        background: var(--card-bg);
+        padding: 20px;
+        border-radius: 8px;
+        margin: 30px 0;
+        text-align: center;
+    }
+
+    .share-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 15px;
+    }
+
+    .share-button {
+        padding: 8px 16px;
+        border-radius: 20px;
+        color: white;
+        text-decoration: none;
+        transition: transform 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .share-button:hover {
+        transform: translateY(-2px);
+    }
+
+    .twitter { background-color: #1DA1F2; }
+    .facebook { background-color: #4267B2; }
+    .linkedin { background-color: #0077B5; }
+
+    .comments {
+        margin-top: 40px;
+    }
+
+    .comment-card {
+        background: var(--card-bg);
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        color: var(--text-muted);
+    }
+
+    .comment-content {
+        line-height: 1.5;
+    }
+
+    .add-comment {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .login-prompt {
+        text-align: center;
+        padding: 20px;
+        background: var(--card-bg);
+        border-radius: 8px;
+    }
+
+    .no-comments {
+        text-align: center;
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+    .related-blogs {
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .related-blogs h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .related-blogs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        padding: 10px;
+    }
+
+    .related-blog-card {
+        background: var(--card-bg);
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+
+    .related-blog-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .related-blog-card h3 {
+        margin: 0 0 10px 0;
+        font-size: 1.2em;
+    }
+
+    .related-blog-card h3 a {
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+
+    .related-blog-card h3 a:hover {
+        text-decoration: underline;
+    }
+
+    .blog-excerpt {
+        color: var(--text-muted);
+        font-size: 0.9em;
+        line-height: 1.5;
+        margin: 10px 0 0 0;
+    }
+</style>
+{% endif %}
+{% endblock %} 
